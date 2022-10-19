@@ -18,4 +18,8 @@ public class Movie {
     String Rating; // Rating - Content maturity rating of the movie || Look into how movie metadata stores rating. May need to change type
     boolean Watched; // Watched - Has the user seen this movie? 0 = No, 1 = Yes
     boolean Interest; // Interest - Is the user interested in this movie? 0 = No, 1 = Yes
+    /* Methods ****************************************************************************************
+    * Update Watched Status
+    * Update Interest Status
+    */
 }
