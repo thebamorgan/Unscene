@@ -6,14 +6,14 @@ package home;
 
 /**
  *
- * @author ultra
+ * @author Zander
  */
 public class TV_Show {
     String Title;
     String RDate;
     int RunT; // RunT - Runtime
     String Genre; // Figure out how to store multiple genres
-    String Desc; // Desc - Description of TV show episode
+    String Desc; // Desc - Description of TV show series
     /*File*/ Art; // Art - Thumbnail or artwork for the TV show episode
     String Cast; // Cast - A cast member in the movie || Definitely figure out how to make Cast into an array to store multiple cast members
     String Rating; // Rating - Content maturity rating of the movie || Look into how movie metadata stores rating. May need to change type

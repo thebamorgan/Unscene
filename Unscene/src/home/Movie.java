@@ -6,7 +6,7 @@ package home;
 
 /**
  *
- * @author ultra
+ * @author Zander
  */
 public class Movie {
     String Title; //Title - Title
