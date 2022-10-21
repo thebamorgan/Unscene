@@ -1,13 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package home;
 
-/**
- *
- * @author Zander
- */
+// @author Zander
+
 public class Movie {
     String Title; //Title - Title
     String RDate; // RDate - Release Date
@@ -22,4 +16,13 @@ public class Movie {
     * Update Watched Status
     * Update Interest Status
     */
+        void UpdateWatched(boolean InWatched){ // EXAMPLE: If{user clicks "Watched"}; Then{UpdateWatched(true)};
+            // Update Watched Status
+            Watched = InWatched;
+        }
+
+        void UpdateInterested(boolean InInterested){ // EXAMPLE: If{user clicks "Interested"}; Then{UpdateInterested(true)}:
+            // Update Interest Status
+            Interest = InInterested;
+        }
 }
