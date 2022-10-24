@@ -1,7 +1,6 @@
 package home;
 import java.io.File;
 
-// @author Zander
 
 public class Movie extends Media {
     private final String RDate;           // Release Date

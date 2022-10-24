@@ -1,6 +1,7 @@
 package home;
 import java.io.File;
 
+
 // Episode is a subclass of TV_Show
 public final class Episode extends TV_Show {
     private final String EpTitle;           // Title of Episode
@@ -12,7 +13,7 @@ public final class Episode extends TV_Show {
      * Default Constructor
      */
     public Episode(){
-        // Call superclass: TV_Show
+        // Call superclass TV_Show
         super();
         
         // Initialize default instance variables

@@ -1,7 +1,6 @@
 package home;
 import java.io.File;
 
-// @author Zander
 
 public class Media {
     private final String Title;           // Title

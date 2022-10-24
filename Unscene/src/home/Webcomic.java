@@ -1,13 +1,14 @@
 package home;
 import java.io.File;
+import java.util.ArrayList;
 
-// @author Zander
 
 public class Webcomic extends Media {
     private final String Artist;        // Think about making it possible to store multiple artists. Temporary solution: "John Doe & Jane Doe"
     private final int NumPagT;          // The total number of pages in a webcomic
     private int NumPagR;                // The number of pages the user has read in this webcomic
-    
+    private final ArrayList<Page> Pages;  // List of pages in comic
+
     
     /**
      * Default Constructor
@@ -20,6 +21,7 @@ public class Webcomic extends Media {
         this.Artist = null;
         this.NumPagT = 0;
         this.NumPagR = 0;
+        this.Pages = new ArrayList();
     }
     
     /**
@@ -43,6 +45,7 @@ public class Webcomic extends Media {
         this.Artist = Artist;
         this.NumPagT = NumPagT;
         this.NumPagR = NumPagR;
+        this.Pages = new ArrayList();
     }
     
     /**
@@ -66,14 +69,48 @@ public class Webcomic extends Media {
      * @return 
      */
     public int getNumPagR(){
+        updateNumPagR();
         return NumPagR;
     }
     
+    
     /**
-     * Set Number of Pages Read
-     * @param NumPagR 
+     * Recalculate Number of Pages Read
      */
-    public void setNumPagR(int NumPagR){
-        this.NumPagR = NumPagR;
+    public void updateNumPagR(){
+        int tempCount = 0;      // Temporary count of read pages
+        
+        for (Page e : Pages){
+            if(e.getPageRead())
+                tempCount++;
+        }
+        
+        NumPagR = tempCount;     // Update number of pages read
+    }
+    
+    /**
+     * Get Full List of All Pages in Comic
+     * @return 
+     */
+    public ArrayList<Page> getAllPages(){
+        return Pages;
+    }
+    
+    /**
+     * Get Specific Page by Index
+     * @param idx
+     * @return 
+     */
+    public Page getPage(int idx){
+        return Pages.get(idx);
+    }
+    
+    /**
+     * Add a New Page to Pages List
+     * @param PageTitle
+     * @param PageRead
+     */
+    public void addEpisode(String PageTitle, boolean PageRead){
+        Pages.add(new Page(PageTitle, PageRead, this.Artist, this.NumPagT, this.NumPagR, super.getTitle(), super.getGenre(), super.getDescription(), super.getArt(), super.getViewed(), super.getInterested()));
     }
 }

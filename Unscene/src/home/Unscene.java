@@ -5,10 +5,7 @@
 package home;
 import java.io.File;
 
-/**
- *
- * @author salwajeries
- */
+
 public class Unscene {
 
     /**

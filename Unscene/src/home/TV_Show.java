@@ -2,7 +2,6 @@ package home;
 import java.io.File;
 import java.util.ArrayList;
 
-// @author Zander
 
 public class TV_Show extends Media {
     private final String RDate;           // Release Date
