@@ -1,80 +1,141 @@
 package home;
 import java.io.File;
+import java.util.ArrayList;
 
 // @author Zander
 
-public class TV_Show {
-    private String Title;           // Show Title
-    private String RDate;           // Release Date
-    private String Genre;           // Genre of Show
-    private String Description;     // Description of TV show series
-    private File Art;               // Thumbnail or artwork for the TV show episode || Can also be link to external media
-    private String Cast;            // A cast member in the movie || Definitely figure out how to make Cast into an array to store multiple cast members
-    private String Rating;          // Content maturity rating of the movie || Look into how movie metadata stores rating. May need to change type
-    private int NumEpT;             // Number of episodes in the series total
-    private int NumEpW;             // Number of episodes in this series the user has watched
-    private boolean Interested;     // Is the user interested in this TV show series? 0 = No, 1 = Yes
-    private boolean Watched;        // Has the user watched this entire series? 0 = No, 1 = Yes
+public class TV_Show extends Media {
+    private final String RDate;           // Release Date
+    private final String Cast;            // A cast member in the movie || Definitely figure out how to make Cast into an array to store multiple cast members
+    private final String Rating;          // Content maturity rating of the movie || Look into how movie metadata stores rating. May need to change type
+    private final int NumEpT;             // Number of episodes in the series total
+    private int NumEpW;                   // Number of episodes in this series the user has watched
+    private final ArrayList<Episode> Episodes;  // List of episodes in show
     
     
     /**
     * Default Constructor
     */
     public TV_Show(){
-        Title = null;
-        RDate = null;
-        Genre = null;
-        Description = null;
-        Art = null;
-        Cast = null;
-        Rating = null;
-        NumEpT = 0;
-        NumEpW = 0;
-        Interested = false;
-        Watched = false;
+        // Call superclass Media
+        super();
+        
+        // Initialize instance variables
+        this.RDate = null;
+        this.Cast = null;
+        this.Rating = null;
+        this.NumEpT = 0;
+        this.NumEpW = 0;
+        this.Episodes = new ArrayList();
     }
 
     /**
-    * Overloaded Constructor
-    * 
-    * @param Title
-    * @param RDate
-    * @param Genre
-    * @param Description
-    * @param Art
-    * @param Cast
-    * @param Rating
-    * @param NumEpT
-    * @param NumEpW
-    * @param Interested
-    * @param Watched 
-    */
-    public TV_Show(String Title, String RDate, String Genre, String Description, File Art, String Cast, String Rating, int NumEpT, int NumEpW, boolean Interested, boolean Watched){
-        this.Title = Title;
+     * Overloaded Constructor
+     * 
+     * @param RDate
+     * @param Cast
+     * @param Rating
+     * @param NumEpT
+     * @param NumEpW
+     * @param Title
+     * @param Genre
+     * @param Description
+     * @param Art
+     * @param Viewed
+     * @param Interested 
+     */
+    public TV_Show(String RDate, String Cast, String Rating, int NumEpT, int NumEpW, String Title, String Genre, String Description, File Art, boolean Viewed, boolean Interested){
+        // Call superclass Media
+        super(Title, Genre, Description, Art, Viewed, Interested);
+
+        // Initialize instance variables
         this.RDate = RDate;
-        this.Genre = Genre;
-        this.Description = Description;
-        this.Art = Art;
         this.Cast = Cast;
         this.Rating = Rating;
         this.NumEpT = NumEpT;
         this.NumEpW = NumEpW;
-        this.Interested = Interested;
-        this.Watched = Watched;
+        this.Episodes = new ArrayList();
     }
     
-    void UpdateEpisodes(int episodes){ // EXAMPLE: if{user enters "69" in 'current episode' entry box in GUI}; then{UpdateEpisodes(69)};
-        // Update Episodes Watched
-        NumEpW = episodes;
+    /**
+     * Get Release Date
+     * @return 
+     */
+    public String getRDate(){
+        return RDate;
     }
-
-    void UpdateWatched(boolean inWatched){ // EXAMPLE: if{user clicks "Watched"}; then{UpdateWatched(true)};
-        // Update Watched Status
-        Watched = inWatched;
+    
+    /**
+     * Get Cast
+     * @return 
+     */
+    public String getCast(){
+        return Cast;
     }
-
-    void UpdateInterest(boolean inInterested){ // EXAMPLE: if{user clicks "Interest"}; then{UpdateInterest(true)};
-        // Update wether the user is interested in this TV Show series
-        Interested = inInterested;
+    
+    /**
+     * Get Rating
+     * @return 
+     */
+    public String getRating(){
+        return Rating;
+    }
+    
+    /**
+     * Get Total Number of Episodes
+     * @return 
+     */
+    public int getNumEpT(){
+        return NumEpT;
+    }
+    
+    /**
+     * Get Number of Episodes Watched
+     * @return 
+     */
+    public int getNumEpW(){
+        updateNumEpW();
+        return NumEpW;
+    }
+    
+    /**
+     * Recalculate Number of Episodes Watched
+     */
+    public void updateNumEpW(){
+        int tempCount = 0;      // Temporary count of watched episodes
+        
+        for (Episode e : Episodes){
+            if(e.getEpWatched())
+                tempCount++;
+        }
+        
+        NumEpW = tempCount;     // Update number of episodes watched
+    }
+    
+    /**
+     * Get Full List of All Episodes in Show
+     * @return 
+     */
+    public ArrayList<Episode> getAllEpisodes(){
+        return Episodes;
+    }
+    
+    /**
+     * Get Specific Episode by Index
+     * @param idx
+     * @return 
+     */
+    public Episode getEpisode(int idx){
+        return Episodes.get(idx);
+    }
+    
+    /**
+     * Add a New Episode to Episodes List
+     * @param EpTitle
+     * @param RunT
+     * @param EpWatched 
+     */
+    public void addEpisode(String EpTitle, int RunT, boolean EpWatched){
+        Episodes.add(new Episode(EpTitle, RunT, EpWatched, this.RDate, this.Cast, this.Rating, this.NumEpT, this.NumEpW, super.getTitle(), super.getGenre(), super.getDescription(), super.getArt(), super.getViewed(), super.getInterested()));
     }
 }

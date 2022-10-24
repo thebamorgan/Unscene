@@ -2,70 +2,78 @@ package home;
 import java.io.File;
 
 // @author Zander
-public class Webcomic {
-    private String Title;           // Title
-    private String Genre;           // Genre of webcomic || Think about making it possible to have multiple genres
-    private String Artist;          // Think about making it possible to store multiple artists. Temporary solution: "John Doe & Jane Doe"
-    private String Description;     // Description of webcomic
-    private File Art;               // General Thumbnail or artwork for the entire webcomic
-    private int NumPagT;            // The total number of pages in a webcomic
-    private int NumPagR;            // The number of pages the user has read in this webcomic
-    private boolean Viewed;         // Has the user seen the most recent page or upload? 0 = No, 1 = Yes
-    private boolean Interested;     // Is the user interested in this webcomic? 0 = No, 1 = Yes
+
+public class Webcomic extends Media {
+    private final String Artist;        // Think about making it possible to store multiple artists. Temporary solution: "John Doe & Jane Doe"
+    private final int NumPagT;          // The total number of pages in a webcomic
+    private int NumPagR;                // The number of pages the user has read in this webcomic
     
     
     /**
      * Default Constructor
      */
     public Webcomic(){
-        Title = null;
-        Genre = null;
-        Artist = null;
-        Description = null;
-        Art = null;
-        NumPagT = 0;
-        NumPagR = 0;
-        Viewed = false;
-        Interested = false;
+        // Call superclass Media
+        super();
+        
+        // Initialize instance variables
+        this.Artist = null;
+        this.NumPagT = 0;
+        this.NumPagR = 0;
     }
-
+    
     /**
      * Overloaded Constructor
      * 
-     * @param Title
-     * @param Genre
      * @param Artist
-     * @param Description
-     * @param Art
      * @param NumPagT
      * @param NumPagR
+     * @param Title
+     * @param Genre
+     * @param Description
+     * @param Art
      * @param Viewed
      * @param Interested 
      */
-    public Webcomic(String Title, String Genre, String Artist, String Description, File Art, int NumPagT, int NumPagR, boolean Viewed, boolean Interested){
-            this.Title = Title;
-            this.Genre = Genre;
-            this.Artist = Artist;
-            this.Description = Description;
-            this.Art = Art;
-            this.NumPagT = NumPagT;
-            this.NumPagR = NumPagR;
-            this.Viewed = Viewed;
-            this.Interested = Interested;   
-        }
+    public Webcomic(String Artist, int NumPagT, int NumPagR, String Title, String Genre, String Description, File Art, boolean Viewed, boolean Interested){
+        // Call superclass Media
+        super(Title, Genre, Description, Art, Viewed, Interested);
+
+        // Initialize instance variables
+        this.Artist = Artist;
+        this.NumPagT = NumPagT;
+        this.NumPagR = NumPagR;
+    }
     
-    void UpdateViewed(boolean inViewed){ // EXAMPLE: if{user clicks "Viewed"}; then{UpdateViewed(true);}
-        // Update Viewed Status of most recent webcomic page
-        Viewed = inViewed;
+    /**
+     * Get Artist
+     * @return 
+     */
+    public String getArtist(){
+        return Artist;
     }
-
-    void UpdateRead(int currentPage){ // EXAMPLE: if{user enters "69" in 'current page' entry box in GUI}; then{UpdateRead(69)};
-        // Update the number of pages the user has read
-        NumPagR = currentPage;
+    
+    /**
+     * Get Number of Pages Total
+     * @return 
+     */
+    public int getNumPagT(){
+        return NumPagT;
     }
-
-    void UpdateInterest(boolean inInterested){ // EXAMPLE: if{user clicks "Interested"}; then{UpdateInterest(true)};
-        // Update wether the user is interested in this webcomic series
-        Interested = inInterested;
+    
+    /**
+     * Get Number of Pages Read
+     * @return 
+     */
+    public int getNumPagR(){
+        return NumPagR;
+    }
+    
+    /**
+     * Set Number of Pages Read
+     * @param NumPagR 
+     */
+    public void setNumPagR(int NumPagR){
+        this.NumPagR = NumPagR;
     }
 }

@@ -3,69 +3,82 @@ import java.io.File;
 
 // @author Zander
 
-public class Movie {
-    private String Title;           // Title
-    private String RDate;           // Release Date
-    private int RunT;               // Runtime in seconds
-    private String Genre;           // Genre of movie || Think about making it possible to have multiple genres
-    private String Description;     // Description of movie
-    private File Art;               // Thumbnail or artwork for the TV show episode || Can also be link to external media
-    private String Cast;            // A cast member in the movie || Definitely figure out how to make Cast into an array to store multiple cast members
-    private String Rating;          // Content maturity rating of the movie || Look into how movie metadata stores rating. May need to change type
-    private boolean Watched;        // Has the user seen this movie? 0 = No, 1 = Yes
-    private boolean Interested;     // Is the user interested in this movie? 0 = No, 1 = Yes
+public class Movie extends Media {
+    private final String RDate;           // Release Date
+    private final int RunT;               // Runtime in seconds
+    private final String Cast;            // A cast member in the movie || Definitely figure out how to make Cast into an array to store multiple cast members
+    private final String Rating;          // Content maturity rating of the movie || Look into how movie metadata stores rating. May need to change type
     
     
     /**
      * Default Constructor
      */
     public Movie(){
-        Title = null;
-        RDate = null;
-        RunT = 0;
-        Genre = null;
-        Description = null;
-        Art = null;
-        Cast = null;
-        Rating = null;
-        Interested = false;
-        Watched = false;
+        // Call superclass Media
+        super();
+        
+        // Initialize instance variables
+        this.RDate = null;
+        this.RunT = 0;
+        this.Cast = null;
+        this.Rating = null;
     }
-
+    
     /**
      * Overloaded Constructor
      * 
-     * @param Title
      * @param RDate
      * @param RunT
+     * @param Cast
+     * @param Rating
+     * @param Title
      * @param Genre
      * @param Description
      * @param Art
-     * @param Cast
-     * @param Rating
-     * @param Interested
-     * @param Watched 
+     * @param Viewed
+     * @param Interested 
      */
-    public Movie(String Title, String RDate, int RunT, String Genre, String Description, File Art, String Cast, String Rating, boolean Interested, boolean Watched){
-        this.Title = Title;
+    public Movie(String RDate, int RunT, String Cast, String Rating, String Title, String Genre, String Description, File Art, boolean Viewed, boolean Interested){
+        // Call superclass Media
+        super(Title, Genre, Description, Art, Viewed, Interested);
+        
+        // Initialize instance variables
         this.RDate = RDate;
         this.RunT = RunT;
-        this.Genre = Genre;
-        this.Description = Description;
-        this.Art = Art;
         this.Cast = Cast;
         this.Rating = Rating;
-        this.Interested = Interested;
-        this.Watched = Watched;
     }
-
-    void UpdateWatched(boolean InWatched){ // EXAMPLE: If{user clicks "Watched"}; Then{UpdateWatched(true)};
-        // Update Watched Status
-        Watched = InWatched;
+    
+    
+    /**
+     * Get Release Date
+     * @return 
+     */
+    public String getRDate(){
+        return RDate;
     }
-
-    void UpdateInterested(boolean InInterested){ // EXAMPLE: If{user clicks "Interested"}; Then{UpdateInterested(true)}:
-        // Update Interest Status
-        Interested = InInterested;
+    
+    /**
+     * Get Run Time
+     * @return 
+     */
+    public int getRunT(){
+        return RunT;
+    }
+    
+    /**
+     * Get Cast
+     * @return 
+     */
+    public String getCast(){
+        return Cast;
+    }
+    
+    /**
+     * Get Rating
+     * @return 
+     */
+    public String getRating(){
+        return Rating;
     }
 }
