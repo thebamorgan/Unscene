@@ -110,7 +110,7 @@ public class Webcomic extends Media {
      * @param PageTitle
      * @param PageRead
      */
-    public void addEpisode(String PageTitle, boolean PageRead){
+    public void addPage(String PageTitle, boolean PageRead){
         Pages.add(new Page(PageTitle, PageRead, this.Artist, this.NumPagT, this.NumPagR, super.getTitle(), super.getGenre(), super.getDescription(), super.getArt(), super.getViewed(), super.getInterested()));
     }
 }
