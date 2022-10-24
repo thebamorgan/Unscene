@@ -30,6 +30,8 @@ public class Unscene {
         System.out.println(mando.getEpisode(0).getEpWatched());
         System.out.println(mando.getNumEpW());
         
+        new HomePage().setVisible(true);
+        
     }
     
 }
