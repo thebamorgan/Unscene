@@ -105,7 +105,13 @@ public class Unscene {
         
         
         // Display temporary home page
-        new HomePage().setVisible(true);
+        //new HomePage().setVisible(true);
+        //new testHome().setVisible(true);
+        //testHome homePage = new testHome();
+        //homePage.setVisible(true);
+        //new testList(Movies).setVisible(true);
+        
+        new testHome(Movies).setVisible(true);
         
     }
     
