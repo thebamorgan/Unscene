@@ -1,45 +1,61 @@
 package home;
+
 import java.io.File;
+import java.util.ArrayList;
 
 
-public class Media {
-    private final String Title;           // Title
-    private final String Genre;           // Genre of movie || Think about making it possible to have multiple genres
-    private final String Description;     // Description of movie
-    private final File Art;               // Thumbnail or artwork for the TV show episode || Can also be link to external media
-    private boolean Viewed;         // Has the user seen this movie? 0 = No, 1 = Yes
+abstract class Media {
+    private final String Title;             // Title
+    private final ArrayList<String> Genre;  // Genre of movie || Think about making it possible to have multiple genres
+    private final String Description;       // Description of movie
+    private final String Tagline;         // A cast member in the movie || Definitely figure out how to make Cast into an array to store multiple cast members
+    private final String Art;               // Thumbnail or artwork for the TV show episode || Can also be link to external media
+    private final int ID;
     private boolean Interested;     // Is the user interested in this movie? 0 = No, 1 = Yes
+    protected boolean Viewed;         // Has the user seen this movie? 0 = No, 1 = Yes
+
     
     
     /**
      * Default Constructor
      */
     public Media(){
-        Title = null;
-        Genre = null;
-        Description = null;
-        Art = null;
-        Viewed = false;
-        Interested = false;
+        this.Title = null;
+        this.Genre = new ArrayList();
+        this.Description = null;
+        this.Tagline = null;
+        this.Art = null;
+        this.ID = 0;
+        this.Interested = false;
+        this.Viewed = false;
     }
 
     /**
-     * Overloaded Constructor
      * 
      * @param Title
      * @param Genre
      * @param Description
+     * @param Tagline
      * @param Art
+     * @param Interested
      * @param Viewed
-     * @param Interested 
+     * @param ID 
      */
-    public Media(String Title, String Genre, String Description, File Art, boolean Viewed, boolean Interested){
+    public Media(String Title, ArrayList<String> Genre, String Description, String Tagline, String Art, boolean Interested, boolean Viewed, int ID){
+        
         this.Title = Title;
-        this.Genre = Genre;
+        
+        this.Genre = new ArrayList();
+        for(String g : Genre) {
+            this.Genre.add(g);
+        }
+        
         this.Description = Description;
+        this.Tagline = Tagline;
         this.Art = Art;
-        this.Viewed = Viewed;
+        this.ID = ID;
         this.Interested = Interested;
+        this.Viewed = Viewed;
     }
     
     /**
@@ -55,6 +71,18 @@ public class Media {
      * @return 
      */
     public String getGenre(){
+        
+        String GenreList = "";
+        
+        for(String g : Genre) {
+            GenreList += g + ", ";
+        }
+        
+        GenreList = GenreList.substring(0, GenreList.length()-2);
+        return GenreList;
+    }
+    
+    public ArrayList<String> getGenreArray() {
         return Genre;
     }
     
@@ -67,27 +95,27 @@ public class Media {
     }
     
     /**
+     * Get Tagline
+     * @return 
+     */
+    public String getTagline(){
+        return Tagline;
+    }
+    
+    /**
      * Get Thumbnail
      * @return 
      */
-    public File getArt(){
+    public String getArt(){
         return Art;
     }
     
     /**
-     * Get Viewed Status
+     * Get Object's Unique ID
      * @return 
      */
-    public boolean getViewed(){
-        return Viewed;
-    }
-    
-    /**
-     * Set Viewed Status
-     * @param Viewed 
-     */
-    public void setViewed(boolean Viewed){
-        this.Viewed = Viewed;
+    public int getID(){
+        return ID;
     }
     
     /**
@@ -105,4 +133,19 @@ public class Media {
     public void setInterested(boolean Interested){
         this.Interested = Interested;
     }
+    
+    /**
+     * Get Viewed Status
+     * @return 
+     */
+    public boolean getViewed(){
+        return Viewed;
+    }
+    
+    /**
+     * Set Viewed Status
+     * @param Viewed 
+     */
+    public abstract void setViewed(boolean Viewed);
+    
 }
