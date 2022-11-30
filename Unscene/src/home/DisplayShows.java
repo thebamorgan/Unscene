@@ -1,49 +1,56 @@
+
 package home;
 
-import java.util.*;
-import java.awt.*;
+import java.awt.Image;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.util.ArrayList;
 import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 
-/**
- *
- * @author salwajeries
- */
 public class DisplayShows extends javax.swing.JPanel {
-
-    private ArrayList<TVShow> Shows;
-    private ArrayList<Season> CurrentSeasons;
-    private DefaultListModel showModel;
-    private DefaultListModel seasonModel;
-    private String[] dropdownOpts;
-    private final String posterFetchURL = "https://image.tmdb.org/t/p/w300_and_h450_bestv2";
-    private TVJSONEditor showReader;
+    private ArrayList<TVShow> Shows;            // List of shows (either All or Interested)    
+    private ArrayList<Season> Seasons;          // List of seasons for current show object being displayed
+    private TVShow CurrentShow;                 // Current show object being displayed
+    private Season CurrentSeason;               // Current season being displayed
+    private DefaultListModel showModel;         // Model for list of shows
+    private DefaultListModel seasonModel;       // Model for dropdown of seasons
+    private final String posterFetchURL;        // URL prefix for TV show posters
+    private TVJSONEditor showReader;            // TVJSONEditor to read TV show data file
+    private final boolean selectListAll;        // Boolean: T for AllShows, F for InterestedShows
+    
     
     /**
      * Default Constructor
      */
     public DisplayShows() {
         initComponents();
+        posterFetchURL = "https://image.tmdb.org/t/p/w300_and_h450_bestv2";
+        selectListAll = false;
     }
     
     /**
      * Overloaded Constructor
      * 
-     * @param importShows
-     * @param showReader
+     * @param showReader to read TV show data file
+     * @param All Boolean - (T = Get All Shows) (F = Get Interested Shows)
      */
-    //public DisplayShows(ArrayList<TVShow> importShows, TVJSONEditor showReader) {
-    public DisplayShows(TVJSONEditor showReader) {
+    public DisplayShows(TVJSONEditor showReader, boolean All) {
         initComponents();
+        posterFetchURL = "https://image.tmdb.org/t/p/w300_and_h450_bestv2";
+        // Initialize fields
         this.showReader = new TVJSONEditor();
         this.showReader = showReader;
-        //this.Shows = importShows;
-        this.Shows = showReader.getAllShows();
-        this.CurrentSeasons = new ArrayList();
+        this.selectListAll = All;
+        
+        // Get correct list based on "All" parameter
+        this.Shows = getShowList();
+        this.Seasons = new ArrayList();
+        
+        seasonsDropdown.removeAllItems();
         
         // Create show list model
         showModel = new DefaultListModel<String>();
@@ -51,39 +58,49 @@ public class DisplayShows extends javax.swing.JPanel {
             showModel.addElement(s.getTitle());
         }
         showList.setModel(showModel);
-        showList.setSelectedIndex(0);      // Automatically select first item in list
-        
+        showList.setSelectedIndex(0);       // Automatically select first item in list
     }
     
     
     /**
-     * Display all show information in the respective JLabels
+     * Get specified TV show list: all shows or interested shows
      * 
-     * @param currentShow 
+     * @return Specified show list
      */
-    private void displayShowInfo(TVShow currentShow) {
+    private ArrayList<TVShow> getShowList() {
+        if(selectListAll)
+            return showReader.getAllShows();
+        else
+            return showReader.getInterestedShows();
+    }
+    
+    
+    /**
+     * Setup UI for JPanel
+     */
+    private void displayShowInfo() {
         
-        // Initialize fields with show data
-        showInterested.setSelected(currentShow.getInterested());
-        showWatched.setSelected(currentShow.getViewed());
-        showTagline.setText(currentShow.getTagline());
-        showDesc.setText(currentShow.getDescription());
+        // Initialize labels with show data
+        showInterested.setSelected(CurrentShow.getInterested());
+        showWatched.setSelected(CurrentShow.getViewed());
+        showTagline.setText(CurrentShow.getTagline());
+        showDesc.setText(CurrentShow.getDescription());
         showDesc.setEditable(false);
         showDesc.setLineWrap(true);
         showDesc.setWrapStyleWord(true);
-        showGenre.setText(currentShow.getGenre());
-        showRDate.setText(currentShow.getOriginalRDateString());
-        showTitle.setText(currentShow.getTitle());
+        showGenre.setText(CurrentShow.getGenre());
+        showOriginalRDate.setText(CurrentShow.getOriginalRDateString());
+        showTitle.setText(CurrentShow.getTitle());
         
-        if(currentShow.getNumSeasons() > 1)
-            showNumSeasons.setText(Integer.toString(currentShow.getNumSeasons()) + " Seasons");
+        // Set number of seasons total
+        if(CurrentShow.getNumSeasons() > 1)
+            showNumSeasons.setText(Integer.toString(CurrentShow.getNumSeasons()) + " Seasons");
         else
-            showNumSeasons.setText(Integer.toString(currentShow.getNumSeasons()) + " Season");
-        
+            showNumSeasons.setText(Integer.toString(CurrentShow.getNumSeasons()) + " Season");
         
         // Setup show poster
         try {
-            String showURL = posterFetchURL + currentShow.getArt();
+            String showURL = posterFetchURL + CurrentShow.getArt();
             URL imageURL = new URL(showURL);
             InputStream in = imageURL.openStream();
             Image image = ImageIO.read(in);
@@ -98,82 +115,92 @@ public class DisplayShows extends javax.swing.JPanel {
             throw new UncheckedIOException(e);
         }
         
-        // Reset pre-existing Combobox values and JPanel cards
-        seasonsDropdown.removeAllItems();
-        displaySeasonInfo.removeAll();
         
-        // Create season combobox
-        displaySeasonInfo.setLayout(new CardLayout());
+        // Reset pre-existing Combobox values
+        seasonsDropdown.removeAllItems();
+        
+        // Get all seasons of current show
+        Seasons = CurrentShow.getSeasons();
+        ArrayList<String> seasonTitles = new ArrayList();
+        for(Season s : Seasons){
+            seasonTitles.add(s.getSeasonTitle());
+        }
+        
+        // Make dropdown season titles
+        String[] dropdownOpts = new String[0];
+        dropdownOpts = new String[seasonTitles.size()];
+        dropdownOpts = seasonTitles.toArray(dropdownOpts);
+        
+        
+        // Insert seasons titles to combo box
+        for(int optIdx = 0; optIdx < dropdownOpts.length; optIdx++) {
+            seasonsDropdown.insertItemAt(dropdownOpts[optIdx], optIdx);
+        }
+        
         seasonsDropdown.setEditable(false);
-        displaySeasonInfo(currentShow);
+        seasonsDropdown.setSelectedIndex(0);
     }
     
     /**
      * Setup displaySeasonInfo JPanel with currently selected season data
-     * 
-     * @param currentShow 
      */
-    private void displaySeasonInfo(TVShow currentShow) {
-
-        // Get all seasons of current show
-        CurrentSeasons = currentShow.getSeasons();
-        ArrayList<String> seasonTitles = new ArrayList();
-        for(Season s : CurrentSeasons)
-            seasonTitles.add(s.getSeasonTitle());
+    private void displaySeasonInfo() {
         
-        // Make dropdown season titles
-        dropdownOpts = new String[0];
-        dropdownOpts = new String[seasonTitles.size()];
-        dropdownOpts = seasonTitles.toArray(dropdownOpts);
+        // Initialize fields with show data
+        seasonDesc.setText(CurrentSeason.getSeasonDesc());
+        seasonDesc.setEditable(false);
+        seasonDesc.setLineWrap(true);
+        seasonDesc.setWrapStyleWord(true);
+        seasonRDate.setText(CurrentSeason.getRDateString());
+        seasonTitle.setText(CurrentSeason.getSeasonTitle());
+        seasonWatched.setSelected(CurrentSeason.getSeasonWatched());
         
-        for(int idx = 0; idx < dropdownOpts.length; idx++) {
-            seasonsDropdown.addItem(dropdownOpts[idx]);
-            displaySeasonInfo.add(new DisplaySeasons((CurrentSeasons.get(idx)), this), dropdownOpts[idx]);
-        }
+        // Initialize total number of episodes
+        if(CurrentSeason.getEpTotal() > 1)
+            seasonEpT.setText(Integer.toString(CurrentSeason.getEpTotal()) + " Episodes");
+        else
+            seasonEpT.setText(Integer.toString(CurrentSeason.getEpTotal()) + " Episode");
     }
     
     /**
      * Update current show object
-     * 
-     * @param currentShow 
      */
-    private void updateShowObject(TVShow currentShow) {
+    private void updateShowObject() {
+        CurrentShow.updateSeasonsWatched();
+        
         // Update show object in JSON file
         try {
-            showReader.updateShow(currentShow);
+            showReader.updateShow(CurrentShow);
         }
         catch (Exception e) {
             System.out.println("Uncaught Exeption - Did not update object");
         }
+        
+        displayShowInfo();
     }
     
     /**
      * Update currently selected season object and update current show object
-     * 
-     * @param importSeason 
      */
-    public void updateSeasonObject(Season importSeason) {
-        
-        // Get current show
-        TVShow currentShow = new TVShow();
-        currentShow = Shows.get(showList.getSelectedIndex());
+    public void updateSeasonObject() {
         
         // Create new Seasons Array for update
-        ArrayList<Season> newSeasons = new ArrayList();
+        ArrayList<Season> newSeasonsList = new ArrayList();
         
         // Locate matching season ID
-        for(Season s: currentShow.getSeasons()) {
-            if(s.getSeasonID() == importSeason.getSeasonID())   // Matching ID, add updated season object
-                newSeasons.add(importSeason);
-            else                                                // Add existing season object
-                newSeasons.add(s);
+        for(Season s: Seasons) {
+            if(s.getSeasonID() == CurrentSeason.getSeasonID()) {                    // Matching ID, add updated season object
+                s.setSeasonWatched(seasonWatched.isSelected());
+            }
+            newSeasonsList.add(s);
         }
         
         // Update current show Seasons ArrayList
-        currentShow.setSeasons(newSeasons);
+        CurrentShow.setSeasons(newSeasonsList);
+        Seasons = newSeasonsList;
         
         // Update current show object
-        updateShowObject(currentShow);
+        updateShowObject();
     }
     
     
@@ -190,25 +217,32 @@ public class DisplayShows extends javax.swing.JPanel {
         showListContainer = new javax.swing.JPanel();
         showListScroll = new javax.swing.JScrollPane();
         showList = new javax.swing.JList<>();
-        displayShowInfoContainer = new javax.swing.JPanel();
+        showFullContainer = new javax.swing.JPanel();
         displayShowStatus = new javax.swing.JPanel();
         showArt = new javax.swing.JLabel();
         showInterested = new javax.swing.JCheckBox();
         showWatched = new javax.swing.JCheckBox();
         displayShowInfo = new javax.swing.JPanel();
         showTitle = new javax.swing.JLabel();
-        showRDate = new javax.swing.JLabel();
+        showOriginalRDate = new javax.swing.JLabel();
         showNumSeasons = new javax.swing.JLabel();
-        showGenre = new javax.swing.JLabel();
-        showTagline = new javax.swing.JLabel();
         showDescScroll = new javax.swing.JScrollPane();
         showDesc = new javax.swing.JTextArea();
         seasonsDropdownContainer = new javax.swing.JPanel();
         seasonsDropdown = new javax.swing.JComboBox<>();
+        showGenre = new javax.swing.JLabel();
+        showTagline = new javax.swing.JLabel();
         displaySeasonInfo = new javax.swing.JPanel();
+        seasonEpT = new javax.swing.JLabel();
+        seasonRDate = new javax.swing.JLabel();
+        seasonTitle = new javax.swing.JLabel();
+        seasonWatched = new javax.swing.JCheckBox();
+        seasonDescScroll = new javax.swing.JScrollPane();
+        seasonDesc = new javax.swing.JTextArea();
 
-        setLayout(null);
+        setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
+        showList.setFont(new java.awt.Font("Helvetica Neue", 0, 15)); // NOI18N
         showList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         showList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
@@ -223,91 +257,65 @@ public class DisplayShows extends javax.swing.JPanel {
             showListContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(showListContainerLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(showListScroll, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
+                .addComponent(showListScroll, javax.swing.GroupLayout.DEFAULT_SIZE, 142, Short.MAX_VALUE)
                 .addContainerGap())
         );
         showListContainerLayout.setVerticalGroup(
             showListContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(showListContainerLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(showListScroll, javax.swing.GroupLayout.DEFAULT_SIZE, 480, Short.MAX_VALUE)
+                .addComponent(showListScroll, javax.swing.GroupLayout.DEFAULT_SIZE, 498, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
-        add(showListContainer);
-        showListContainer.setBounds(6, 6, 152, 492);
+        add(showListContainer, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 6, -1, -1));
 
+        showFullContainer.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        displayShowStatus.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        displayShowStatus.add(showArt, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 6, 200, 300));
+
+        showInterested.setFont(new java.awt.Font("Helvetica Neue", 0, 15)); // NOI18N
         showInterested.setText("Interested in this show?");
         showInterested.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 showInterestedActionPerformed(evt);
             }
         });
+        displayShowStatus.add(showInterested, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 318, 200, -1));
 
-        showWatched.setText("Watched this entire show?");
+        showWatched.setFont(new java.awt.Font("Helvetica Neue", 0, 15)); // NOI18N
+        showWatched.setText("Watched this show?");
         showWatched.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 showWatchedActionPerformed(evt);
             }
         });
+        displayShowStatus.add(showWatched, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 345, 200, -1));
 
-        javax.swing.GroupLayout displayShowStatusLayout = new javax.swing.GroupLayout(displayShowStatus);
-        displayShowStatus.setLayout(displayShowStatusLayout);
-        displayShowStatusLayout.setHorizontalGroup(
-            displayShowStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(displayShowStatusLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(displayShowStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(displayShowStatusLayout.createSequentialGroup()
-                        .addComponent(showArt, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(showWatched, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(showInterested, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        displayShowStatusLayout.setVerticalGroup(
-            displayShowStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(displayShowStatusLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(showArt, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(showInterested)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(showWatched)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+        showFullContainer.add(displayShowStatus, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 6, -1, -1));
 
         displayShowInfo.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        showTitle.setText("Title");
-        displayShowInfo.add(showTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 6, 228, 48));
+        showTitle.setFont(new java.awt.Font("Helvetica Neue", 1, 21)); // NOI18N
+        showTitle.setText("There are no shows in this list.");
+        displayShowInfo.add(showTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 6, 310, 48));
 
-        showRDate.setText("Release Date");
-        displayShowInfo.add(showRDate, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 60, 228, 23));
+        showOriginalRDate.setFont(new java.awt.Font("Helvetica Neue", 0, 18)); // NOI18N
+        displayShowInfo.add(showOriginalRDate, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 60, 310, 23));
 
-        showNumSeasons.setText("Seasons");
-        displayShowInfo.add(showNumSeasons, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 89, 86, 23));
-
-        showGenre.setText("Genre");
-        displayShowInfo.add(showGenre, new org.netbeans.lib.awtextra.AbsoluteConstraints(98, 89, 136, 23));
-
-        showTagline.setText("Tagline");
-        displayShowInfo.add(showTagline, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 130, 228, 23));
+        showNumSeasons.setFont(new java.awt.Font("Helvetica Neue", 0, 18)); // NOI18N
+        displayShowInfo.add(showNumSeasons, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 89, 310, 23));
 
         showDesc.setColumns(20);
         showDesc.setRows(5);
         showDescScroll.setViewportView(showDesc);
 
-        displayShowInfo.add(showDescScroll, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 206, 228, 274));
+        displayShowInfo.add(showDescScroll, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 286, 310, 206));
 
         seasonsDropdown.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 seasonsDropdownItemStateChanged(evt);
-            }
-        });
-        seasonsDropdown.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                seasonsDropdownActionPerformed(evt);
             }
         });
 
@@ -315,139 +323,179 @@ public class DisplayShows extends javax.swing.JPanel {
         seasonsDropdownContainer.setLayout(seasonsDropdownContainerLayout);
         seasonsDropdownContainerLayout.setHorizontalGroup(
             seasonsDropdownContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(seasonsDropdown, javax.swing.GroupLayout.Alignment.TRAILING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGap(0, 290, Short.MAX_VALUE)
+            .addGroup(seasonsDropdownContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, seasonsDropdownContainerLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(seasonsDropdown, 0, 310, Short.MAX_VALUE)))
         );
         seasonsDropdownContainerLayout.setVerticalGroup(
             seasonsDropdownContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(seasonsDropdownContainerLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(seasonsDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGap(0, 47, Short.MAX_VALUE)
+            .addGroup(seasonsDropdownContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(seasonsDropdownContainerLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(seasonsDropdown, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE)
+                    .addContainerGap()))
         );
 
-        displayShowInfo.add(seasonsDropdownContainer, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 159, 228, -1));
+        displayShowInfo.add(seasonsDropdownContainer, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 225, -1, -1));
 
-        javax.swing.GroupLayout displaySeasonInfoLayout = new javax.swing.GroupLayout(displaySeasonInfo);
-        displaySeasonInfo.setLayout(displaySeasonInfoLayout);
-        displaySeasonInfoLayout.setHorizontalGroup(
-            displaySeasonInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 226, Short.MAX_VALUE)
-        );
-        displaySeasonInfoLayout.setVerticalGroup(
-            displaySeasonInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-        );
+        showGenre.setFont(new java.awt.Font("Helvetica Neue", 0, 15)); // NOI18N
+        showGenre.setMaximumSize(new java.awt.Dimension(310, 29));
+        displayShowInfo.add(showGenre, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 118, 310, 29));
 
-        javax.swing.GroupLayout displayShowInfoContainerLayout = new javax.swing.GroupLayout(displayShowInfoContainer);
-        displayShowInfoContainer.setLayout(displayShowInfoContainerLayout);
-        displayShowInfoContainerLayout.setHorizontalGroup(
-            displayShowInfoContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(displayShowInfoContainerLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(displayShowStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(displayShowInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(displaySeasonInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        displayShowInfoContainerLayout.setVerticalGroup(
-            displayShowInfoContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, displayShowInfoContainerLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(displayShowInfoContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(displaySeasonInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(displayShowStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(displayShowInfo, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
+        showTagline.setFont(new java.awt.Font("Helvetica Neue", 3, 14)); // NOI18N
+        displayShowInfo.add(showTagline, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 187, 310, 30));
 
-        add(displayShowInfoContainer);
-        displayShowInfoContainer.setBounds(164, 6, 690, 492);
+        showFullContainer.add(displayShowInfo, new org.netbeans.lib.awtextra.AbsoluteConstraints(217, 6, -1, -1));
+
+        displaySeasonInfo.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        seasonEpT.setFont(new java.awt.Font("Helvetica Neue", 0, 15)); // NOI18N
+        displaySeasonInfo.add(seasonEpT, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 89, 255, 27));
+
+        seasonRDate.setFont(new java.awt.Font("Helvetica Neue", 0, 15)); // NOI18N
+        displaySeasonInfo.add(seasonRDate, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 60, 255, 23));
+
+        seasonTitle.setFont(new java.awt.Font("Helvetica Neue", 2, 18)); // NOI18N
+        displaySeasonInfo.add(seasonTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 6, 255, 48));
+
+        seasonWatched.setFont(new java.awt.Font("Helvetica Neue", 0, 15)); // NOI18N
+        seasonWatched.setText("Watched this season?");
+        seasonWatched.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                seasonWatchedActionPerformed(evt);
+            }
+        });
+        displaySeasonInfo.add(seasonWatched, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 134, 255, -1));
+
+        seasonDesc.setColumns(20);
+        seasonDesc.setRows(5);
+        seasonDescScroll.setViewportView(seasonDesc);
+
+        displaySeasonInfo.add(seasonDescScroll, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 173, 259, 319));
+
+        showFullContainer.add(displaySeasonInfo, new org.netbeans.lib.awtextra.AbsoluteConstraints(543, 6, -1, -1));
+
+        add(showFullContainer, new org.netbeans.lib.awtextra.AbsoluteConstraints(153, 6, 820, -1));
     }// </editor-fold>//GEN-END:initComponents
 
     
+    
     /**
      * Update display of show information based on selected show in list
-     * 
      * @param evt 
      */
     private void showListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_showListValueChanged
-        TVShow currentShow = new TVShow();
-        currentShow = Shows.get(showList.getSelectedIndex());
-        displayShowInfo(currentShow);
+        CurrentShow = Shows.get(showList.getSelectedIndex());
+        displayShowInfo();
     }//GEN-LAST:event_showListValueChanged
 
     /**
      * Update show interest status for current show
-     * 
      * @param evt 
      */
     private void showInterestedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showInterestedActionPerformed
-        // Get show object
-        TVShow currentShow = Shows.get(showList.getSelectedIndex());
-        
+        // Get currently selected show index
+        int currentIdx = showList.getSelectedIndex();
+
         // Set show interest status
         if(showInterested.isSelected())
-            currentShow.setInterested(true);
+            CurrentShow.setInterested(true);
         else
-            currentShow.setInterested(false);
+            CurrentShow.setInterested(false);
         
         // Update show object
-        updateShowObject(currentShow);
+        updateShowObject();
         
-        // Re-display show info
-        displayShowInfo(currentShow);
+        // If displaying for watchlist AND show was removed
+        if(!selectListAll && !showInterested.isSelected())
+            UnsceneGUI.refreshGUI();
+        else
+            showList.setSelectedIndex(currentIdx);
     }//GEN-LAST:event_showInterestedActionPerformed
 
     /**
      * Update show watched status for current show
-     * 
      * @param evt 
      */
     private void showWatchedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showWatchedActionPerformed
-        // Get show object
-        TVShow currentShow = Shows.get(showList.getSelectedIndex());
-        
+        // Get currently selected show index
+        int currentIdx = showList.getSelectedIndex();
+
         // Set show watched status
         if(showWatched.isSelected())
-            currentShow.setViewed(true);
+            CurrentShow.setViewed(true);
         else
-            currentShow.setViewed(false);
+            CurrentShow.setViewed(false);
         
         // Update show object
-        updateShowObject(currentShow);
+        updateShowObject();
         
-        // Re-display show info
-        displayShowInfo(currentShow);
+        // If displaying for watchlist AND show was removed
+        if(!selectListAll && !showWatched.isSelected())
+            UnsceneGUI.refreshGUI();
+        else
+            showList.setSelectedIndex(currentIdx);
     }//GEN-LAST:event_showWatchedActionPerformed
 
-    private void seasonsDropdownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_seasonsDropdownActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_seasonsDropdownActionPerformed
-
+    /**
+     * Update display of season information based on selected season in drop down
+     * @param evt 
+     */
     private void seasonsDropdownItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_seasonsDropdownItemStateChanged
-        CardLayout cl = (CardLayout)(displaySeasonInfo.getLayout());
-        cl.show(displaySeasonInfo, (String)evt.getItem());
+        if(seasonsDropdown.getSelectedIndex() >= 0) {   // Verify valid index
+            CurrentSeason = Seasons.get(seasonsDropdown.getSelectedIndex());
+            displaySeasonInfo();
+        }
     }//GEN-LAST:event_seasonsDropdownItemStateChanged
+
+    /**
+     * Update season watched status for current season
+     * @param evt 
+     */
+    private void seasonWatchedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_seasonWatchedActionPerformed
+        // Set season interest status
+        if(seasonWatched.isSelected())
+            CurrentSeason.setSeasonWatched(true);
+        else
+            CurrentSeason.setSeasonWatched(false);
+
+        // Get current season index
+        int currentIdx = seasonsDropdown.getSelectedIndex();
+
+        // Update season object and refresh
+        updateSeasonObject();
+        
+        // Select current season
+        seasonsDropdown.setSelectedIndex(currentIdx);
+    }//GEN-LAST:event_seasonWatchedActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel displaySeasonInfo;
     private javax.swing.JPanel displayShowInfo;
-    private javax.swing.JPanel displayShowInfoContainer;
     private javax.swing.JPanel displayShowStatus;
+    private javax.swing.JTextArea seasonDesc;
+    private javax.swing.JScrollPane seasonDescScroll;
+    private javax.swing.JLabel seasonEpT;
+    private javax.swing.JLabel seasonRDate;
+    private javax.swing.JLabel seasonTitle;
+    private javax.swing.JCheckBox seasonWatched;
     private javax.swing.JComboBox<String> seasonsDropdown;
     private javax.swing.JPanel seasonsDropdownContainer;
     private javax.swing.JLabel showArt;
     private javax.swing.JTextArea showDesc;
     private javax.swing.JScrollPane showDescScroll;
+    private javax.swing.JPanel showFullContainer;
     private javax.swing.JLabel showGenre;
     private javax.swing.JCheckBox showInterested;
     private javax.swing.JList<String> showList;
     private javax.swing.JPanel showListContainer;
     private javax.swing.JScrollPane showListScroll;
     private javax.swing.JLabel showNumSeasons;
-    private javax.swing.JLabel showRDate;
+    private javax.swing.JLabel showOriginalRDate;
     private javax.swing.JLabel showTagline;
     private javax.swing.JLabel showTitle;
     private javax.swing.JCheckBox showWatched;

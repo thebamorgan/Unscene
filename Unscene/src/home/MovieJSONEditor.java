@@ -1,20 +1,18 @@
 package home;
 
 import java.util.ArrayList;
-
 import java.io.PrintWriter;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import java.io.FileReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.*;
 
 public class MovieJSONEditor {
-    private String DataFile;
-    private ArrayList<Movie> InterestedMovies;
-    private ArrayList<Movie> AllMovies;
+    private final String DataFile;                  // Datafile to read
+    private ArrayList<Movie> InterestedMovies;      // ArrayList of interested movies
+    private ArrayList<Movie> AllMovies;             // ArrayList of all movies
     
     
     /**
@@ -29,7 +27,8 @@ public class MovieJSONEditor {
     /**
      * Overloaded Constructor
      * 
-     * @param filename 
+     * @param filename to read from
+     * @throws Exception 
      */
     public MovieJSONEditor(String filename) throws Exception {
         this.DataFile = filename;
@@ -40,12 +39,17 @@ public class MovieJSONEditor {
         readFile();
     }
     
+    
     /**
-     * Read JSON file, load data in InterestedMovies list and InterestedShows list
+     * Read JSON file, load data in InterestedMovies list and AllMovies list
      * 
      * @throws Exception 
      */
     private void readFile() throws Exception {
+        
+        // Reset Arrays
+        InterestedMovies.clear();
+        AllMovies.clear();
         
         // Fetch movie array from JSON file
         Object obj = new JSONParser().parse(new FileReader(DataFile));
@@ -60,6 +64,7 @@ public class MovieJSONEditor {
             
             // Add movie to AllMovies list
             Movie addMovie = readMovie(movie);
+            addMovie.updateInterested();
             AllMovies.add(addMovie);
             
             // If interested, add to InterestedMovies list
@@ -71,8 +76,8 @@ public class MovieJSONEditor {
     /**
      * Read Movie Object from JSONArray of Movies
      * 
-     * @param movie
-     * @return 
+     * @param movie JSON object to read
+     * @return Movie object
      */
     private Movie readMovie(JSONObject movie){
         
@@ -104,7 +109,7 @@ public class MovieJSONEditor {
     /**
      * Update JSON File with edited movie object parameter
      * 
-     * @param updateMovie
+     * @param updateMovie object to insert in data file
      * @throws Exception 
      */
     public void updateMovie(Movie updateMovie) throws Exception {
@@ -128,6 +133,7 @@ public class MovieJSONEditor {
             }
         }
         
+        // Write to data file
         PrintWriter pw = new PrintWriter(DataFile);
         pw.write(jo.toJSONString());
         
@@ -139,18 +145,70 @@ public class MovieJSONEditor {
     /**
      * Get AllMovies List
      * 
-     * @return 
+     * @return All Movies ArrayList
      */
     public ArrayList<Movie> getAllMovies() {
+        try {
+            readFile();
+        } catch (Exception ex) {
+            Logger.getLogger(MovieJSONEditor.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return AllMovies;
     }
     
     /**
      * Get InterestedMovies List
-     * @return 
+     * 
+     * @return Interested Movies ArrayList
      */
     public ArrayList<Movie> getInterestedMovies() {
+        try {
+            readFile();
+        } catch (Exception ex) {
+            Logger.getLogger(MovieJSONEditor.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return InterestedMovies;
+    }
+    
+    /**
+     * Get Number of Total Movies
+     * 
+     * @return Total Number of Movies
+     */
+    public int getNumAllMovies() {
+        return AllMovies.size();
+    }
+    
+    /**
+     * Get Number of Interested Movies
+     * 
+     * @return Number of Interested Movies
+     */
+    public int getNumInterestedMovies() {
+        return InterestedMovies.size();
+    }
+    
+    /**
+     * Get Number of Watched Movies by reading through AllMovies list
+     * 
+     * @return Number of Watched Movies
+     */
+    public int getNumWatchedMovies() {
+        try {
+            readFile();
+        } catch (Exception ex) {
+            Logger.getLogger(MovieJSONEditor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        int counter = 0;
+        
+        for(Movie m : AllMovies) {
+            
+            if(m.getViewed())
+                counter++;
+        }
+        
+        return counter;
     }
     
 }

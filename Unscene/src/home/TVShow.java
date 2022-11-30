@@ -1,13 +1,12 @@
 package home;
-import java.io.File;
+
 import java.util.ArrayList;
 
-
 public class TVShow extends Media {
-    private final String OriginalRDate;         // Release Date
-    private final int NumSeasons;
-    private int SeasonsWatched;
-    private ArrayList<Season> Seasons;    // List of seasons in show
+    private final String OriginalRDate;     // Release Date of show
+    private final int NumSeasons;           // Number of seasons in show
+    private int SeasonsWatched;             // Number of seasons watched
+    private ArrayList<Season> Seasons;      // List of seasons in show
     
     
     /**
@@ -54,7 +53,7 @@ public class TVShow extends Media {
     
     /**
      * Get Original Release Date
-     * @return 
+     * @return OriginalRDate
      */
     public String getOriginalRDate(){
         return OriginalRDate;
@@ -62,7 +61,7 @@ public class TVShow extends Media {
     
     /**
      * Get Original Release Date as Formatted String
-     * @return 
+     * @return Formatted Original Release Date
      */
     public String getOriginalRDateString(){
         String year = OriginalRDate.substring(0, 4);
@@ -73,7 +72,7 @@ public class TVShow extends Media {
     
     /**
      * Get Number of Seasons Total
-     * @return 
+     * @return Total Number of Seasons
      */
     public int getNumSeasons(){
         return NumSeasons;
@@ -81,16 +80,18 @@ public class TVShow extends Media {
     
     /**
      * Get Number of Seasons Watched Status
-     * @return 
+     * Then check for update in seasons watched status
+     * @return Number of Seasons Watched
      */
     public int getSeasonsWatched(){
+        updateSeasonsWatched();
         return SeasonsWatched;
     }
     
     /**
      * Update Number of Seasons Watched
      */
-    public void setSeasonsWatched(){
+    public void updateSeasonsWatched(){
         int counter = 0;
         for(Season s : Seasons){
             if(s.getSeasonWatched())
@@ -101,18 +102,37 @@ public class TVShow extends Media {
     
     /**
      * Get ArrayList of Season Objects
-     * @return 
+     * Then check for update in seasons watched status
+     * @return Seasons ArrayList
      */
     public ArrayList<Season> getSeasons(){
+        updateSeasonsWatched();
         return Seasons;
     }
     
     /**
      * Set ArrayList of Season Objects for Updates
-     * @param Seasons 
+     * Then check for update in seasons watched status
+     * @param Seasons
      */
     public void setSeasons(ArrayList<Season> Seasons){
         this.Seasons = Seasons;
+        updateSeasonsWatched();
+    }
+    
+    /**
+     * Get Viewed Status
+     * @return Viewed status
+     */
+    public boolean getViewed(){
+        updateSeasonsWatched();
+        
+        if(SeasonsWatched == NumSeasons)
+            this.Viewed = true;
+        else
+            this.Viewed = false;
+        
+        return this.Viewed;
     }
     
     /**

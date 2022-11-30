@@ -1,3 +1,4 @@
+
 package home;
 
 import java.util.*;
@@ -9,36 +10,38 @@ import java.net.URL;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-/**
- *
- * @author salwajeries
- */
 public class DisplayMovies extends javax.swing.JPanel {
-
-    private ArrayList<Movie> Movies;
-    private DefaultListModel movieModel;
-    private final String posterFetchURL = "https://image.tmdb.org/t/p/w300_and_h450_bestv2";
-    private MovieJSONEditor movieReader;
+    private ArrayList<Movie> Movies;        // List of movies (either All or Interested)
+    private Movie CurrentMovie;             // Current movie object being displayed
+    private DefaultListModel movieModel;    // Model for list of movies
+    private final String posterFetchURL;    // URL prefix for movie posters
+    private MovieJSONEditor movieReader;    // MovieJSONEditor to read movie data file
+    private final boolean selectListAll;    // Boolean: T for AllMovies, F for InterestedMovies
     
     /**
      * Default Constructor
      */
     public DisplayMovies() {
         initComponents();
+        posterFetchURL = "https://image.tmdb.org/t/p/w300_and_h450_bestv2";
+        selectListAll = false;
     }
     
     /**
      * Overloaded Constructor
      * 
-     * @param movieReader
+     * @param movieReader to read movie data file
+     * @param All Boolean - (T = Get All Movies) (F = Get Interested Movies)
      */
-    //public DisplayMovies(ArrayList<Movie> importMovies, MovieJSONEditor movieReader) {
-    public DisplayMovies(MovieJSONEditor movieReader) {
+    public DisplayMovies(MovieJSONEditor movieReader, boolean All) {
         initComponents();
+        posterFetchURL = "https://image.tmdb.org/t/p/w300_and_h450_bestv2";
         this.movieReader = new MovieJSONEditor();
         this.movieReader = movieReader;
-        //this.Movies = importMovies;
-        this.Movies = movieReader.getAllMovies();
+        selectListAll = All;
+        
+        // Get correct list based on "All" parameter
+        this.Movies = getMovieList();
         
         // Create movie list model
         movieModel = new DefaultListModel<String>();
@@ -51,28 +54,38 @@ public class DisplayMovies extends javax.swing.JPanel {
     
     
     /**
-     * Display all movie information in the respective JLabels
+     * Get specified movie list: all movies or interested movies
      * 
-     * @param currentMovie 
+     * @return Specified movie list
      */
-    private void displayMovieInfo(Movie currentMovie) {
+    private ArrayList<Movie> getMovieList() {
+        if(selectListAll)
+            return movieReader.getAllMovies();
+        else
+            return movieReader.getInterestedMovies();
+    }
+    
+    /**
+     * Setup UI for JPanel
+     */
+    private void displayMovieInfo() {
         
         // Initialize fields with movie data
-        movieInterested.setSelected(currentMovie.getInterested());
-        movieWatched.setSelected(currentMovie.getViewed());
-        movieTagline.setText(currentMovie.getTagline());
-        movieDesc.setText(currentMovie.getDescription());
+        movieInterested.setSelected(CurrentMovie.getInterested());
+        movieWatched.setSelected(CurrentMovie.getViewed());
+        movieTagline.setText(CurrentMovie.getTagline());
+        movieDesc.setText(CurrentMovie.getDescription());
         movieDesc.setEditable(false);
         movieDesc.setLineWrap(true);
         movieDesc.setWrapStyleWord(true);
-        movieGenre.setText(currentMovie.getGenre());
-        movieRDate.setText(currentMovie.getRDateString());
-        movieRunT.setText(currentMovie.getRunTString());
-        movieTitle.setText(currentMovie.getTitle());
+        movieGenre.setText(CurrentMovie.getGenre());
+        movieRDate.setText(CurrentMovie.getRDateString());
+        movieRunT.setText(CurrentMovie.getRunTString());
+        movieTitle.setText(CurrentMovie.getTitle());
         
         // Setup movie poster
         try {
-            String movieURL = posterFetchURL + currentMovie.getArt();
+            String movieURL = posterFetchURL + CurrentMovie.getArt();
             URL imageURL = new URL(movieURL);
             InputStream in = imageURL.openStream();
             Image image = ImageIO.read(in);
@@ -89,6 +102,8 @@ public class DisplayMovies extends javax.swing.JPanel {
         
     }
 
+    
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -115,6 +130,7 @@ public class DisplayMovies extends javax.swing.JPanel {
         movieDescScroll = new javax.swing.JScrollPane();
         movieDesc = new javax.swing.JTextArea();
 
+        movieList.setFont(new java.awt.Font("Helvetica Neue", 0, 15)); // NOI18N
         movieList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         movieList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
@@ -140,6 +156,7 @@ public class DisplayMovies extends javax.swing.JPanel {
                 .addContainerGap())
         );
 
+        movieInterested.setFont(new java.awt.Font("Helvetica Neue", 0, 15)); // NOI18N
         movieInterested.setText("Interested in this movie?");
         movieInterested.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -147,6 +164,7 @@ public class DisplayMovies extends javax.swing.JPanel {
             }
         });
 
+        movieWatched.setFont(new java.awt.Font("Helvetica Neue", 0, 15)); // NOI18N
         movieWatched.setText("Watched this movie?");
         movieWatched.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -177,18 +195,19 @@ public class DisplayMovies extends javax.swing.JPanel {
                 .addComponent(movieInterested)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(movieWatched)
-                .addContainerGap(114, Short.MAX_VALUE))
+                .addContainerGap(111, Short.MAX_VALUE))
         );
 
-        movieTitle.setText("Title");
+        movieTitle.setFont(new java.awt.Font("Helvetica Neue", 1, 24)); // NOI18N
+        movieTitle.setText("There are no movies in this list.");
 
-        movieRDate.setText("Release Date");
+        movieRDate.setFont(new java.awt.Font("Helvetica Neue", 0, 18)); // NOI18N
 
-        movieRunT.setText("RunTime");
+        movieRunT.setFont(new java.awt.Font("Helvetica Neue", 0, 18)); // NOI18N
 
-        movieGenre.setText("Genre");
+        movieGenre.setFont(new java.awt.Font("Helvetica Neue", 0, 18)); // NOI18N
 
-        movieTagline.setText("Tagline");
+        movieTagline.setFont(new java.awt.Font("Helvetica Neue", 3, 14)); // NOI18N
 
         movieDesc.setColumns(20);
         movieDesc.setRows(5);
@@ -246,9 +265,9 @@ public class DisplayMovies extends javax.swing.JPanel {
             displayMovieInfoContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, displayMovieInfoContainerLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(displayMovieInfoContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(displayMovieInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(displayMovieStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(displayMovieInfoContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(displayMovieStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(displayMovieInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -275,69 +294,75 @@ public class DisplayMovies extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     
+    
     /**
      * Update display of movie information based on selected movie in list
-     * 
      * @param evt 
      */
     private void movieListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_movieListValueChanged
-        Movie currentMovie = new Movie();
-        currentMovie = Movies.get(movieList.getSelectedIndex());
-        displayMovieInfo(currentMovie);
+        CurrentMovie = Movies.get(movieList.getSelectedIndex());
+        displayMovieInfo();
     }//GEN-LAST:event_movieListValueChanged
 
     /**
      * Update movie interest status for current movie
-     * 
      * @param evt 
      */
     private void movieInterestedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_movieInterestedActionPerformed
-        // Get movie object
-        Movie currentMovie = Movies.get(movieList.getSelectedIndex());
-        
+        // Get currently selected index
+        int currentIdx = movieList.getSelectedIndex();
+
         // Set movie interest status
         if(movieInterested.isSelected())
-            currentMovie.setInterested(true);
-        else
-            currentMovie.setInterested(false);
+            CurrentMovie.setInterested(true);
+        else {
+            CurrentMovie.setInterested(false);
+        }
         
         // Update movie object in JSON file
         try {
-            movieReader.updateMovie(currentMovie);
+            movieReader.updateMovie(CurrentMovie);
         }
         catch (Exception e) {
             System.out.println("Uncaught Exeption - Did not update object");
         }
         
-        // Re-display movie info
-        displayMovieInfo(currentMovie);
+        
+        // If displaying for watchlist AND movie was removed
+        if(!selectListAll && !movieInterested.isSelected())
+            UnsceneGUI.refreshGUI();
+        else
+            movieList.setSelectedIndex(currentIdx);
     }//GEN-LAST:event_movieInterestedActionPerformed
 
     /**
      * Update movie watched status for current movie
-     * 
      * @param evt 
      */
     private void movieWatchedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_movieWatchedActionPerformed
-        // Get movie object
-        Movie currentMovie = Movies.get(movieList.getSelectedIndex());
+        // Get currently selected index
+        int currentIdx = movieList.getSelectedIndex();
         
         // Set movie watched status
         if(movieWatched.isSelected())
-            currentMovie.setViewed(true);
+            CurrentMovie.setViewed(true);
         else
-            currentMovie.setViewed(false);
+            CurrentMovie.setViewed(false);
         
         // Update movie object in JSON file
         try {
-            movieReader.updateMovie(currentMovie);
+            movieReader.updateMovie(CurrentMovie);
         }
         catch (Exception e) {
             System.out.println("Uncaught Exeption - Did not update object");
         }
         
-        // Re-display movie info
-        displayMovieInfo(currentMovie);
+        // If displaying for watchlist AND movie was removed
+        if(!selectListAll && !movieWatched.isSelected()) {
+            UnsceneGUI.refreshGUI();
+        }
+        else
+            movieList.setSelectedIndex(currentIdx);
     }//GEN-LAST:event_movieWatchedActionPerformed
 
 

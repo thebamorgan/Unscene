@@ -1,20 +1,18 @@
 package home;
 
 import java.util.ArrayList;
-
 import java.io.PrintWriter;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import java.io.FileReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.*;
 
 public class TVJSONEditor {
-    private String DataFile;
-    private ArrayList<TVShow> InterestedShows;
-    private ArrayList<TVShow> AllShows;
+    private String DataFile;                        // Datafile to read
+    private ArrayList<TVShow> InterestedShows;      // ArrayList of ineterested shows
+    private ArrayList<TVShow> AllShows;             // ArrayList of all shows
     
     
     /**
@@ -29,7 +27,8 @@ public class TVJSONEditor {
     /**
      * Overloaded Constructor
      * 
-     * @param filename 
+     * @param filename to read from
+     * @throws Exception
      */
     public TVJSONEditor(String filename) throws Exception {
         this.DataFile = filename;
@@ -48,12 +47,16 @@ public class TVJSONEditor {
      */
     private void readFile() throws Exception {
         
+        // Reset Arrays
+        InterestedShows.clear();
+        AllShows.clear();
+        
         // Fetch tv array from JSON file
         Object obj = new JSONParser().parse(new FileReader(DataFile));
         JSONObject jo = (JSONObject) obj;
         JSONArray showslist = (JSONArray) jo.get("tv");
         
-        // Read each movie in array
+        // Read each show in array
         for(Object s : showslist) {
             
             // Convert show to JSONObject
@@ -61,6 +64,7 @@ public class TVJSONEditor {
             
             // Add show to AllShows list
             TVShow addShow = readShow(show);
+            addShow.updateInterested();
             AllShows.add(addShow);
             
             // If interested, add to InterestedShows list
@@ -72,8 +76,8 @@ public class TVJSONEditor {
     /**
      * Read Show Object from JSONArray of TV Shows
      * 
-     * @param show
-     * @return 
+     * @param show JSON object to read
+     * @return TVShow object
      */
     private TVShow readShow(JSONObject show){
         
@@ -110,8 +114,8 @@ public class TVJSONEditor {
     /**
      * Read Season for JSONArray of Seasons
      * 
-     * @param seasonslist
-     * @return 
+     * @param seasonslist JSON object to read
+     * @return Seasons ArrayList
      */
     private ArrayList<Season> readSeason(JSONArray seasonslist){
         
@@ -135,7 +139,6 @@ public class TVJSONEditor {
 
                 Season addSeason = new Season(SeasonTitle, SeasonDesc, RDate, EpTotal, EpWatched, SeasonID);
                 Seasons.add(addSeason);
-                
             }
         }
         
@@ -146,7 +149,7 @@ public class TVJSONEditor {
      * Count Number of Seasons Watched
      * 
      * @param seasons
-     * @return 
+     * @return Number of seasons watched
      */
     private int countSeasonsWatched(ArrayList<Season> seasons){
         
@@ -164,7 +167,7 @@ public class TVJSONEditor {
     /**
      * Update JSON File with edited TV show object parameter
      * 
-     * @param updateShow
+     * @param updateShow object to insert in data file
      * @throws Exception 
      */
     public void updateShow(TVShow updateShow) throws Exception {
@@ -204,6 +207,7 @@ public class TVJSONEditor {
             }
         }
         
+        // Write to data file
         PrintWriter pw = new PrintWriter(DataFile);
         pw.write(jo.toJSONString());
         
@@ -214,7 +218,7 @@ public class TVJSONEditor {
     /**
      * Get AllShows List
      * 
-     * @return 
+     * @return All Shows ArrayList
      */
     public ArrayList<TVShow> getAllShows() {
         return AllShows;
@@ -223,10 +227,50 @@ public class TVJSONEditor {
     /**
      * Get InterestedShows List
      * 
-     * @return 
+     * @return Interested Shows ArrayList
      */
     public ArrayList<TVShow> getInterestedShows() {
         return InterestedShows;
     }
     
+    
+    /**
+     * Get Number of Total Shows
+     * 
+     * @return Total Number of Shows
+     */
+    public int getNumAllShows() {
+        return AllShows.size();
+    }
+    
+    /**
+     * Get Number of Interested Shows
+     * 
+     * @return Number of Interested Shows
+     */
+    public int getNumInterestedShows() {
+        return InterestedShows.size();
+    }
+    
+    /**
+     * Get Number of Watched Shows
+     * 
+     * @return Number of Watched Shows
+     */
+    public int getNumWatchedShows() {
+        try {
+            readFile();
+        } catch (Exception ex) {
+            Logger.getLogger(MovieJSONEditor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        int counter = 0;
+        
+        for(TVShow m : AllShows) {
+            if(m.getViewed())
+                counter++;
+        }
+        
+        return counter;
+    }
 }

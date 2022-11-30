@@ -3,40 +3,18 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package home;
-import java.awt.*;
-import javax.swing.*;
 
 /**
  *
  * @author salwajeries
  */
-public class NewJFrame extends javax.swing.JFrame {
+public class MainGUI extends javax.swing.JFrame {
 
-    private JPanel mainPanel, subPanel1, subPanel2;
     /**
-     * Creates new form NewJFrame
+     * Creates new form MainGUI
      */
-    public NewJFrame() {
+    public MainGUI() {
         initComponents();
-        setTitle("MultiPanel Test");
-        mainPanel = new JPanel(); // main panel
-        mainPanel.setLayout(new GridLayout(3, 1));
-        mainPanel.add(new JLabel("Main Panel", SwingConstants.CENTER));
-        mainPanel.setBackground(Color.white);
-        mainPanel.setBorder(BorderFactory.createLineBorder(Color.black, 1));
-        subPanel1 = new JPanel(); // sub-panel 1
-        subPanel1.add(new JLabel("Panel One", SwingConstants.CENTER));
-        subPanel1.setBackground(Color.red);
-        subPanel2 = new JPanel(); // sub-panel 2
-        subPanel2.setBackground(Color.blue);
-        subPanel2.add(new JLabel("Panel Two", SwingConstants.CENTER));
-        mainPanel.add(subPanel1);
-        mainPanel.add(subPanel2);
-        this.add(mainPanel);
-        this.setSize(400, 300);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setLocationRelativeTo(null);
-        this.setVisible(true);
     }
 
     /**
@@ -81,20 +59,20 @@ public class NewJFrame extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(NewJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(NewJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(NewJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(NewJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new NewJFrame();
+                new MainGUI().setVisible(true);
             }
         });
     }

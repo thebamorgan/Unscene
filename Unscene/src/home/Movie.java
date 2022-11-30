@@ -1,12 +1,10 @@
 package home;
 
-import java.io.File;
 import java.util.ArrayList;
 
-
 public class Movie extends Media {
-    private final String RDate;           // Release Date
-    private final int RunT;               // Runtime in seconds    
+    private final String RDate;           // Release Date of movie
+    private final int RunT;               // Runtime of movie in minutes 
     
     /**
      * Default Constructor
@@ -23,16 +21,16 @@ public class Movie extends Media {
     /**
      * Overloaded Constructor
      * 
-     * @param RDate
-     * @param RunT
-     * @param Title
-     * @param Genre
-     * @param Description
-     * @param Tagline
-     * @param Art
-     * @param Interested
-     * @param Viewed
-     * @param ID 
+     * @param RDate of movie
+     * @param RunT of movie
+     * @param Title of movie
+     * @param Genre of movie
+     * @param Description of movie
+     * @param Tagline for movie
+     * @param Art for movie
+     * @param Interested status
+     * @param Viewed status
+     * @param ID unique to movie
      */
     public Movie(String RDate, int RunT, String Title, ArrayList<String> Genre, String Description, String Tagline, String Art, boolean Interested, boolean Viewed, int ID){
         // Call superclass Media
@@ -46,7 +44,7 @@ public class Movie extends Media {
     
     /**
      * Get Release Date
-     * @return 
+     * @return RDate
      */
     public String getRDate(){
         return RDate;
@@ -54,9 +52,8 @@ public class Movie extends Media {
     
     /**
      * Get Release Date as Formatted String
-     * MM/DD/YYYY
-     * YYYY-MM-DD
-     * @return 
+     * YYYY-MM-DD -> MM/DD/YYYY
+     * @return Formatted Release Date
      */
     public String getRDateString(){
         String year = RDate.substring(0, 4);
@@ -67,7 +64,7 @@ public class Movie extends Media {
     
     /**
      * Get Run Time
-     * @return 
+     * @return RunT
      */
     public int getRunT(){
         return RunT;
@@ -75,7 +72,7 @@ public class Movie extends Media {
     
     /**
      * Get Run Time as Formatted String
-     * @return 
+     * @return Formatted Run Time
      */
     public String getRunTString(){
         int hr = RunT / 60;
@@ -84,8 +81,16 @@ public class Movie extends Media {
     }
     
     /**
+     * Get Viewed Status
+     * @return Viewed
+     */
+    public boolean getViewed(){
+        return this.Viewed;
+    }
+    
+    /**
      * Set Viewed Status
-     * @param Viewed 
+     * @param Viewed status
      */
     public void setViewed(boolean Viewed){
         this.Viewed = Viewed;
