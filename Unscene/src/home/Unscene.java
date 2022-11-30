@@ -29,8 +29,8 @@ public class Unscene {
             FlatLightLaf.setup();
         
         // Initialize JSON Data Readers
-        MovieJSONEditor movieReader = new MovieJSONEditor("src/data/movietest.json");
-        TVJSONEditor showReader = new TVJSONEditor("src/data/tvtest.json");
+        MovieJSONEditor movieReader = new MovieJSONEditor("src/data/movie_data.json");
+        TVJSONEditor showReader = new TVJSONEditor("src/data/tv_data.json");
         
         // DISPLAY MAINFRAME
         new UnsceneGUI(movieReader, showReader, UserName).setVisible(true);
